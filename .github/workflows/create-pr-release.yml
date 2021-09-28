@@ -25,5 +25,5 @@ jobs:
           GIT_PR_RELEASE_BRANCH_STAGING: develop
           GIT_PR_RELEASE_LABELS: pr-release
         run: |
-          gem install -N git-pr-release -v "1.8.0"
+          gem install -N git-pr-release -v "1.9.0"
           git-pr-release --no-fetch
