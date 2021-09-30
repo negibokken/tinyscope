@@ -1,3 +1,7 @@
+mod html;
+
 fn main() {
-    println!("Hello, world!");
+    let mut p = html::html_parser::Parser::new();
+    let ans = p.parse("");
+    println!("{}", format!(">>> Hello, world! {}", ans));
 }
