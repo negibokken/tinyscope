@@ -21,6 +21,9 @@ impl Tokenizer {
         }
         tok
     }
+
+    fn consume(&self) {
+        println!("consume");
     }
 }
 
@@ -32,5 +35,11 @@ mod tests {
     fn initial_state_is_data() {
         let tokenizer = Tokenizer::new("hello");
         assert_eq!(tokenizer.state, State::DataState);
+    }
+
+    #[test]
+    fn consume() {
+        let tokenizer = Tokenizer::new("hello");
+        tokenizer.consume();
     }
 }
