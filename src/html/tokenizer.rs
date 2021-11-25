@@ -9,7 +9,16 @@ enum State {
 }
 
 impl Tokenizer {
-    pub fn new() -> Self {
+    pub fn new(input: String) -> Self {
+        dbg!(input);
+        if cfg!(debug_assertions) {
+            println!(
+                "{:?}",
+                Tokenizer {
+                    state: State::DataState,
+                },
+            );
+        }
         Tokenizer {
             state: State::DataState,
         }
@@ -22,7 +31,7 @@ mod tests {
 
     #[test]
     fn initial_state_is_data() {
-        let tokenizer = Tokenizer::new();
+        let tokenizer = Tokenizer::new("hello".to_string());
         assert_eq!(tokenizer.state, State::DataState);
     }
 }
