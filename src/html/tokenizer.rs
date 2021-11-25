@@ -2,6 +2,7 @@
 pub struct Tokenizer {
     state: State,
     input: String,
+    idx: u64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -15,6 +16,7 @@ impl Tokenizer {
         let tok = Self {
             state: State::DataState,
             input: input.to_string(),
+            idx: 0,
         };
         if cfg!(debug_assertions) {
             println!("{:?}", tok,);
