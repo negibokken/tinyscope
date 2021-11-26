@@ -8,6 +8,7 @@ pub struct Tokenizer {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 enum State {
     DataState,
+    TagOpenState,
 }
 
 impl Tokenizer {
@@ -29,6 +30,20 @@ impl Tokenizer {
             return false;
         }
         println!("{}", self.input.chars().nth(self.idx).unwrap());
+        let c = self.input.chars().nth(self.idx).unwrap();
+        match self.state {
+            State::DataState => match c {
+                '<' => {
+                    self.state = State::TagOpenState;
+                }
+                _ => {
+                    return false;
+                }
+            },
+            _ => {
+                return false;
+            }
+        }
         self.idx += 1;
         true
     }
@@ -46,7 +61,7 @@ mod tests {
 
     #[test]
     fn consume() {
-        let str = "hello";
+        let str = "<html>";
         let mut tokenizer = Tokenizer::new(str);
         let mut idx = 0;
         while idx < str.len() as usize {
