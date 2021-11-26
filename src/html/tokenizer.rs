@@ -12,13 +12,6 @@ enum State {
     TagNameState,
 }
 
-fn ascii_letter(c: char) -> bool {
-    match c {
-        'a'..='z' | 'A'..='Z' => true,
-        _ => false,
-    }
-}
-
 impl Tokenizer {
     pub fn new(input: &str) -> Self {
         dbg!(input);
