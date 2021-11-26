@@ -9,6 +9,14 @@ pub struct Tokenizer {
 enum State {
     DataState,
     TagOpenState,
+    TagNameState,
+}
+
+fn ascii_letter(c: char) -> bool {
+    match c {
+        'a'..='z' | 'A'..='Z' => true,
+        _ => false,
+    }
 }
 
 impl Tokenizer {
@@ -29,7 +37,7 @@ impl Tokenizer {
         if self.idx >= self.input.len() as usize {
             return false;
         }
-        println!("{}", self.input.chars().nth(self.idx).unwrap());
+        println!("> {}", self.input.chars().nth(self.idx).unwrap());
         let c = self.input.chars().nth(self.idx).unwrap();
         match self.state {
             State::DataState => match c {
@@ -38,6 +46,23 @@ impl Tokenizer {
                 }
                 _ => {
                     return false;
+                }
+            },
+            State::TagOpenState => match c {
+                'a'..='z' | 'A'..='Z' => {
+                    self.state = State::TagNameState;
+                    self.idx -= 1;
+                }
+                _ => {
+                    unimplemented!("TagOpenState {}", c)
+                }
+            },
+            State::TagNameState => match c {
+                'a'..='z' | 'A'..='Z' => {
+                    println!("todo TagNameState {}", c);
+                }
+                _ => {
+                    unimplemented!("TagNameState {}", c)
                 }
             },
             _ => {
@@ -61,7 +86,7 @@ mod tests {
 
     #[test]
     fn consume() {
-        let str = "<html>";
+        let str = "<html/>";
         let mut tokenizer = Tokenizer::new(str);
         let mut idx = 0;
         while idx < str.len() as usize {
