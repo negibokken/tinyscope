@@ -2515,6 +2515,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7572415bd688d401c52f6e36f4c8e805b9ae1622619303b9fa835d531db0acae"
 
 [[package]]
+name = "tinyscope"
+version = "0.1.0"
+dependencies = [
+ "iced",
+ "reqwest",
+]
+
+[[package]]
 name = "tinyvec"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2582,14 +2590,6 @@ name = "tower-service"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "360dfd1d6d30e05fda32ace2c8c70e9c0a9da713275777f5a4dbb8a1893930c6"
-
-[[package]]
-name = "toyscopy-rust"
-version = "0.1.0"
-dependencies = [
- "iced",
- "reqwest",
-]
 
 [[package]]
 name = "tracing"
