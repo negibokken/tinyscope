@@ -3,6 +3,23 @@ pub struct Tokenizer {
     state: State,
     input: String,
     idx: usize,
+    current_token: Option<Token>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+struct Token {
+    tag_name: String,
+}
+
+impl Token {
+    pub fn new(tag_name: &str) -> Self {
+        Token {
+            tag_name: tag_name.to_string(),
+        }
+    }
+    pub fn append_tag_name(&mut self, tag_name: String) {
+        self.tag_name.push_str(&tag_name);
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -20,6 +37,7 @@ impl Tokenizer {
             state: State::DataState,
             input: input.to_string(),
             idx: 0,
+            current_token: None,
         };
         if cfg!(debug_assertions) {
             println!("{:?}", tok,);
@@ -45,6 +63,8 @@ impl Tokenizer {
             },
             State::TagOpenState => match c {
                 'a'..='z' | 'A'..='Z' => {
+                    let tok = Token::new("");
+                    self.current_token = Some(tok);
                     self.state = State::TagNameState;
                     self.idx -= 1;
                 }
@@ -55,6 +75,10 @@ impl Tokenizer {
             State::TagNameState => match c {
                 'a'..='z' | 'A'..='Z' => {
                     println!("todo TagNameState {}", c);
+                    self.current_token
+                        .as_mut()
+                        .unwrap()
+                        .append_tag_name(c.to_string());
                 }
                 '/' => {
                     println!("todo TagNameState /");
@@ -67,6 +91,7 @@ impl Tokenizer {
             State::SelfClosingStartTagState => match c {
                 '>' => {
                     println!("emit current tag");
+                    self.emit(self.current_token.as_ref().unwrap());
                     self.state = State::DataState;
                 }
                 _ => {
@@ -83,6 +108,10 @@ impl Tokenizer {
 
     pub fn at_eof(&self) -> bool {
         self.idx >= self.input.len() as usize
+    }
+
+    pub fn emit(&self, token: &Token) {
+        println!("emit {:?}", token);
     }
 }
 
@@ -103,5 +132,6 @@ mod tests {
         while !tokenizer.at_eof() {
             assert_eq!(tokenizer.consume(), true);
         }
+        println!("{:?}", tokenizer.current_token);
     }
 }
