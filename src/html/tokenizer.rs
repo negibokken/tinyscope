@@ -10,6 +10,7 @@ enum State {
     DataState,
     TagOpenState,
     TagNameState,
+    SelfClosingStartTagState,
 }
 
 impl Tokenizer {
@@ -27,6 +28,7 @@ impl Tokenizer {
     }
 
     fn consume(&mut self) -> bool {
+        println!("idx: {}", self.idx);
         if self.idx >= self.input.len() as usize {
             return false;
         }
@@ -54,8 +56,21 @@ impl Tokenizer {
                 'a'..='z' | 'A'..='Z' => {
                     println!("todo TagNameState {}", c);
                 }
+                '/' => {
+                    println!("todo TagNameState /");
+                    self.state = State::SelfClosingStartTagState;
+                }
                 _ => {
                     unimplemented!("TagNameState {}", c)
+                }
+            },
+            State::SelfClosingStartTagState => match c {
+                '>' => {
+                    println!("emit current tag");
+                    self.state = State::DataState;
+                }
+                _ => {
+                    unimplemented!("SelfClosingStartTagState {}", c)
                 }
             },
             _ => {
@@ -84,10 +99,8 @@ mod tests {
     fn consume() {
         let str = "<html/>";
         let mut tokenizer = Tokenizer::new(str);
-        let mut idx = 0;
-        while idx < str.len() as usize {
-            idx += 1;
-            assert_eq!(tokenizer.consume(), true)
+        while !tokenizer.at_eof() {
+            assert_eq!(tokenizer.consume(), true);
         }
     }
 }
