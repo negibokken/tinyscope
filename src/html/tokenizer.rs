@@ -2,7 +2,7 @@
 pub struct Tokenizer {
     state: State,
     input: String,
-    idx: u64,
+    idx: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -24,8 +24,12 @@ impl Tokenizer {
         tok
     }
 
-    fn consume(&self) -> bool {
-        println!("consume");
+    fn consume(&mut self) -> bool {
+        if self.idx >= self.input.len() as usize {
+            return false;
+        }
+        println!("{}", self.input.chars().nth(self.idx).unwrap());
+        self.idx += 1;
         true
     }
 }
@@ -42,7 +46,12 @@ mod tests {
 
     #[test]
     fn consume() {
-        let tokenizer = Tokenizer::new("hello");
-        assert_eq!(tokenizer.consume(), true)
+        let str = "hello";
+        let mut tokenizer = Tokenizer::new(str);
+        let mut idx = 0;
+        while idx < str.len() as usize {
+            idx += 1;
+            assert_eq!(tokenizer.consume(), true)
+        }
     }
 }
