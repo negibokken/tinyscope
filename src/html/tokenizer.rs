@@ -24,8 +24,9 @@ impl Tokenizer {
         tok
     }
 
-    fn consume(&self) {
+    fn consume(&self) -> bool {
         println!("consume");
+        true
     }
 }
 
@@ -42,6 +43,6 @@ mod tests {
     #[test]
     fn consume() {
         let tokenizer = Tokenizer::new("hello");
-        tokenizer.consume();
+        assert_eq!(tokenizer.consume(), true)
     }
 }
