@@ -65,6 +65,9 @@ impl Tokenizer {
         self.idx += 1;
         true
     }
+    pub fn at_eof(&self) -> bool {
+        self.idx >= self.input.len() as usize
+    }
 }
 
 #[cfg(test)]
