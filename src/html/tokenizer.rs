@@ -84,6 +84,10 @@ impl Tokenizer {
                     println!("todo TagNameState /");
                     self.state = State::SelfClosingStartTagState;
                 }
+                '/' => {
+                    println!("todo TagNameState /");
+                    self.state = State::SelfClosingStartTagState;
+                }
                 _ => {
                     unimplemented!("TagNameState {}", c)
                 }
