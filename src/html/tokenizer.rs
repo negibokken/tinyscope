@@ -10,12 +10,19 @@ pub struct Tokenizer {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum TokenKind {
+    StartTag,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Token {
+    kind: TokenKind,
     tag_name: String,
     self_closing: bool,
 }
 
 pub struct TokenOpt {
+    kind: TokenKind,
     tag_name: String,
     self_closing: bool,
 }
@@ -23,6 +30,7 @@ pub struct TokenOpt {
 impl Token {
     pub fn new(opt: TokenOpt) -> Self {
         Token {
+            kind: opt.kind,
             tag_name: opt.tag_name.to_string(),
             self_closing: opt.self_closing,
         }
@@ -86,6 +94,7 @@ impl Tokenizer {
             State::TagOpenState => match c {
                 'a'..='z' | 'A'..='Z' => {
                     let tok = Token::new(TokenOpt {
+                        kind: TokenKind::StartTag,
                         tag_name: "".to_string(),
                         self_closing: false,
                     });
@@ -175,6 +184,7 @@ mod tests {
         assert_eq!(
             tokenizer.take_next_token().unwrap(),
             Token::new(TokenOpt {
+                kind: TokenKind::StartTag,
                 tag_name: "html".to_string(),
                 self_closing: true,
             })
