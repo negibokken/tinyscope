@@ -10,7 +10,7 @@ pub struct Tokenizer {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-struct Token {
+pub struct Token {
     tag_name: String,
     self_closing: bool,
 }
