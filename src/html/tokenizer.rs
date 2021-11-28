@@ -179,5 +179,6 @@ mod tests {
                 self_closing: true,
             })
         );
+        assert_eq!(tokenizer.token_buffers.len(), 0);
     }
 }
