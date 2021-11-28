@@ -12,16 +12,28 @@ pub struct Tokenizer {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct Token {
     tag_name: String,
+    self_closing: bool,
+}
+
+pub struct TokenOpt {
+    tag_name: String,
+    self_closing: bool,
 }
 
 impl Token {
-    pub fn new(tag_name: &str) -> Self {
+    pub fn new(opt: TokenOpt) -> Self {
         Token {
-            tag_name: tag_name.to_string(),
+            tag_name: opt.tag_name.to_string(),
+            self_closing: opt.self_closing,
         }
     }
+
     pub fn append_tag_name(&mut self, tag_name: String) {
         self.tag_name.push_str(&tag_name);
+    }
+
+    pub fn set_self_closing(&mut self) {
+        self.self_closing = true;
     }
 }
 
@@ -73,7 +85,10 @@ impl Tokenizer {
             },
             State::TagOpenState => match c {
                 'a'..='z' | 'A'..='Z' => {
-                    let tok = Token::new("");
+                    let tok = Token::new(TokenOpt {
+                        tag_name: "".to_string(),
+                        self_closing: false,
+                    });
                     self.current_token = Some(tok);
                     self.reconsume(State::TagNameState)
                 }
@@ -103,6 +118,7 @@ impl Tokenizer {
             State::SelfClosingStartTagState => match c {
                 '>' => {
                     println!("emit current tag");
+                    self.current_token.as_mut().unwrap().set_self_closing();
                     let tok = self.current_token.clone().unwrap();
                     self.emit(&tok);
                     go!(self, State::DataState);
@@ -156,6 +172,12 @@ mod tests {
         }
         assert_eq!(tokenizer.token_buffers.len(), 1);
         println!("{:?}", tokenizer.current_token);
-        assert_eq!(tokenizer.take_next_token().unwrap(), Token::new("html"));
+        assert_eq!(
+            tokenizer.take_next_token().unwrap(),
+            Token::new(TokenOpt {
+                tag_name: "html".to_string(),
+                self_closing: true,
+            })
+        );
     }
 }
