@@ -33,6 +33,12 @@ enum State {
     SelfClosingStartTagState,
 }
 
+macro_rules! go {
+    ($x:expr, $y:expr) => {
+        $x.state = $y;
+    };
+}
+
 impl Tokenizer {
     pub fn new(input: &str) -> Self {
         dbg!(input);
@@ -85,7 +91,10 @@ impl Tokenizer {
                 }
                 '/' => {
                     println!("todo TagNameState /");
-                    self.state = State::SelfClosingStartTagState;
+                    go!(self, State::SelfClosingStartTagState);
+                }
+                '>' => {
+                    go!(self, State::DataState);
                 }
                 _ => {
                     unimplemented!("TagNameState {}", c)
@@ -96,7 +105,7 @@ impl Tokenizer {
                     println!("emit current tag");
                     let tok = self.current_token.clone().unwrap();
                     self.emit(&tok);
-                    self.state = State::DataState;
+                    go!(self, State::DataState);
                 }
                 _ => {
                     unimplemented!("SelfClosingStartTagState {}", c)
@@ -112,7 +121,7 @@ impl Tokenizer {
 
     fn reconsume(&mut self, state: State) {
         self.idx -= 1;
-        self.state = state;
+        go!(self, state);
     }
 
     pub fn at_eof(&self) -> bool {
