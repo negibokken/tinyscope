@@ -69,8 +69,7 @@ impl Tokenizer {
                 'a'..='z' | 'A'..='Z' => {
                     let tok = Token::new("");
                     self.current_token = Some(tok);
-                    self.state = State::TagNameState;
-                    self.idx -= 1;
+                    self.reconsume(State::TagNameState)
                 }
                 _ => {
                     unimplemented!("TagOpenState {}", c)
@@ -109,6 +108,11 @@ impl Tokenizer {
         }
         self.idx += 1;
         true
+    }
+
+    fn reconsume(&mut self, state: State) {
+        self.idx -= 1;
+        self.state = state;
     }
 
     pub fn at_eof(&self) -> bool {
