@@ -118,6 +118,10 @@ impl Tokenizer {
     pub fn emit(&mut self, token: &Token) {
         self.token_buffers.push_back(token.clone());
     }
+
+    pub fn take_next_token(&mut self) -> Option<Token> {
+        self.token_buffers.pop_front()
+    }
 }
 
 #[cfg(test)]
@@ -139,5 +143,6 @@ mod tests {
         }
         assert_eq!(tokenizer.token_buffers.len(), 1);
         println!("{:?}", tokenizer.current_token);
+        assert_eq!(tokenizer.take_next_token().unwrap(), Token::new("html"));
     }
 }
