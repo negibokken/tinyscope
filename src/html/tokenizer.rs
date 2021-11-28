@@ -1,9 +1,12 @@
+use std::collections::VecDeque;
+
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Tokenizer {
     state: State,
     input: String,
     idx: usize,
     current_token: Option<Token>,
+    token_buffers: VecDeque<Token>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -38,6 +41,7 @@ impl Tokenizer {
             input: input.to_string(),
             idx: 0,
             current_token: None,
+            token_buffers: VecDeque::new(),
         };
         if cfg!(debug_assertions) {
             println!("{:?}", tok,);
@@ -91,7 +95,8 @@ impl Tokenizer {
             State::SelfClosingStartTagState => match c {
                 '>' => {
                     println!("emit current tag");
-                    self.emit(self.current_token.as_ref().unwrap());
+                    let tok = self.current_token.clone().unwrap();
+                    self.emit(&tok);
                     self.state = State::DataState;
                 }
                 _ => {
@@ -110,8 +115,8 @@ impl Tokenizer {
         self.idx >= self.input.len() as usize
     }
 
-    pub fn emit(&self, token: &Token) {
-        println!("emit {:?}", token);
+    pub fn emit(&mut self, token: &Token) {
+        self.token_buffers.push_back(token.clone());
     }
 }
 
@@ -132,6 +137,7 @@ mod tests {
         while !tokenizer.at_eof() {
             assert_eq!(tokenizer.consume(), true);
         }
+        assert_eq!(tokenizer.token_buffers.len(), 1);
         println!("{:?}", tokenizer.current_token);
     }
 }
