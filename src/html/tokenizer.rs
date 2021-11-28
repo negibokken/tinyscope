@@ -111,7 +111,7 @@ impl Tokenizer {
                     self.current_token
                         .as_mut()
                         .unwrap()
-                        .append_tag_name(c.to_string());
+                        .append_tag_name(c.to_ascii_lowercase().to_string());
                 }
                 '/' => {
                     println!("todo TagNameState /");
