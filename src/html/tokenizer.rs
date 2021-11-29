@@ -12,27 +12,33 @@ pub struct Tokenizer {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum TokenKind {
     StartTag,
+    Character,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Token {
     kind: TokenKind,
-    tag_name: String,
     self_closing: bool,
+
+    tag_name: String,
+    val: char,
 }
 
 pub struct TokenOpt {
     kind: TokenKind,
     tag_name: String,
     self_closing: bool,
+    val: char,
 }
 
 impl Token {
     pub fn new(opt: TokenOpt) -> Self {
         Token {
             kind: opt.kind,
-            tag_name: opt.tag_name.to_string(),
             self_closing: opt.self_closing,
+
+            tag_name: opt.tag_name.to_string(),
+            val: opt.val,
         }
     }
 
@@ -88,7 +94,13 @@ impl Tokenizer {
                     self.state = State::TagOpenState;
                 }
                 _ => {
-                    return false;
+                    let tok = Token::new(TokenOpt {
+                        kind: TokenKind::Character,
+                        tag_name: String::new(),
+                        self_closing: false,
+                        val: c,
+                    });
+                    self.emit(&tok);
                 }
             },
             State::TagOpenState => match c {
@@ -97,6 +109,7 @@ impl Tokenizer {
                         kind: TokenKind::StartTag,
                         tag_name: "".to_string(),
                         self_closing: false,
+                        val: '\0',
                     });
                     self.current_token = Some(tok);
                     self.reconsume(State::TagNameState)
@@ -118,6 +131,8 @@ impl Tokenizer {
                     go!(self, State::SelfClosingStartTagState);
                 }
                 '>' => {
+                    let tok = self.current_token.clone().unwrap();
+                    self.emit(&tok);
                     go!(self, State::DataState);
                 }
                 _ => {
@@ -174,21 +189,38 @@ mod tests {
 
     #[test]
     fn consume() {
-        let str = "<html/>";
+        let str = "<html>hi";
+        let expected = vec![
+            Token::new(TokenOpt {
+                kind: TokenKind::StartTag,
+                tag_name: "html".to_string(),
+                self_closing: false,
+                val: '\0',
+            }),
+            Token::new(TokenOpt {
+                kind: TokenKind::Character,
+                tag_name: String::new(),
+                self_closing: false,
+                val: 'h',
+            }),
+            Token::new(TokenOpt {
+                kind: TokenKind::Character,
+                tag_name: String::new(),
+                self_closing: false,
+                val: 'i',
+            }),
+        ];
         let mut tokenizer = Tokenizer::new(str);
         while !tokenizer.at_eof() {
             assert_eq!(tokenizer.consume(), true);
         }
-        assert_eq!(tokenizer.token_buffers.len(), 1);
-        println!("{:?}", tokenizer.current_token);
-        assert_eq!(
-            tokenizer.take_next_token().unwrap(),
-            Token::new(TokenOpt {
-                kind: TokenKind::StartTag,
-                tag_name: "html".to_string(),
-                self_closing: true,
-            })
-        );
+        assert_eq!(tokenizer.token_buffers.len(), 3);
+        let mut i = 0;
+        while !tokenizer.token_buffers.is_empty() {
+            let tok = tokenizer.take_next_token().unwrap();
+            assert_eq!(expected[i], tok);
+            i += 1;
+        }
         assert_eq!(tokenizer.token_buffers.len(), 0);
     }
 }
