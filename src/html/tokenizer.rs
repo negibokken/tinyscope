@@ -12,6 +12,7 @@ pub struct Tokenizer {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum TokenKind {
     StartTag,
+    EndTag,
     Character,
 }
 
@@ -57,6 +58,7 @@ enum State {
     TagOpenState,
     TagNameState,
     SelfClosingStartTagState,
+    EndTagOpenState,
 }
 
 macro_rules! go {
@@ -115,6 +117,9 @@ impl Tokenizer {
                     self.current_token = Some(tok);
                     self.reconsume(State::TagNameState)
                 }
+                '/' => {
+                    go!(self, State::EndTagOpenState);
+                }
                 _ => {
                     unimplemented!("TagOpenState {}", c)
                 }
@@ -149,6 +154,22 @@ impl Tokenizer {
                 }
                 _ => {
                     unimplemented!("SelfClosingStartTagState {}", c)
+                }
+            },
+            State::EndTagOpenState => match c {
+                'a'..='z' | 'A'..='Z' => {
+                    println!("todo EndTagOpenState {}", c);
+                    let tok = Token::new(TokenOpt {
+                        kind: TokenKind::EndTag,
+                        tag_name: "".to_string(),
+                        self_closing: false,
+                        val: '\0',
+                    });
+                    self.current_token = Some(tok);
+                    self.reconsume(State::TagNameState);
+                }
+                _ => {
+                    unimplemented!("EndTagOpenState {}", c)
                 }
             },
             _ => {
@@ -193,7 +214,7 @@ mod tests {
 
     #[test]
     fn consume() {
-        let str = "<html>hi";
+        let str = "<html>hi</html>";
         let expected = vec![
             Token::new(TokenOpt {
                 kind: TokenKind::StartTag,
@@ -213,12 +234,18 @@ mod tests {
                 self_closing: false,
                 val: 'i',
             }),
+            Token::new(TokenOpt {
+                kind: TokenKind::EndTag,
+                tag_name: "html".to_string(),
+                self_closing: false,
+                val: '\0',
+            }),
         ];
         let mut tokenizer = Tokenizer::new(str);
         while !tokenizer.at_eof() {
             assert_eq!(tokenizer.consume(), true);
         }
-        assert_eq!(tokenizer.token_buffers.len(), 3);
+        assert_eq!(tokenizer.token_buffers.len(), expected.len());
         let mut i = 0;
         while !tokenizer.token_buffers.is_empty() {
             let tok = tokenizer.take_next_token().unwrap();
