@@ -100,7 +100,8 @@ impl Tokenizer {
                         self_closing: false,
                         val: c,
                     });
-                    self.emit(&tok);
+                    self.current_token = Some(tok);
+                    self.emit_current_token();
                 }
             },
             State::TagOpenState => match c {
@@ -132,7 +133,7 @@ impl Tokenizer {
                 }
                 '>' => {
                     let tok = self.current_token.clone().unwrap();
-                    self.emit(&tok);
+                    self.emit_current_token();
                     go!(self, State::DataState);
                 }
                 _ => {
@@ -143,8 +144,7 @@ impl Tokenizer {
                 '>' => {
                     println!("emit current tag");
                     self.current_token.as_mut().unwrap().set_self_closing();
-                    let tok = self.current_token.clone().unwrap();
-                    self.emit(&tok);
+                    self.emit_current_token();
                     go!(self, State::DataState);
                 }
                 _ => {
@@ -170,6 +170,10 @@ impl Tokenizer {
 
     pub fn emit(&mut self, token: &Token) {
         self.token_buffers.push_back(token.clone());
+    }
+
+    pub fn emit_current_token(&mut self) {
+        self.emit(&self.current_token.clone().unwrap());
     }
 
     pub fn take_next_token(&mut self) -> Option<Token> {
