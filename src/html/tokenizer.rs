@@ -214,11 +214,17 @@ mod tests {
 
     #[test]
     fn consume() {
-        let str = "<html>hi</html>";
+        let str = "<html><body>hi</body></html>";
         let expected = vec![
             Token::new(TokenOpt {
                 kind: TokenKind::StartTag,
                 tag_name: "html".to_string(),
+                self_closing: false,
+                val: '\0',
+            }),
+            Token::new(TokenOpt {
+                kind: TokenKind::StartTag,
+                tag_name: "body".to_string(),
                 self_closing: false,
                 val: '\0',
             }),
@@ -233,6 +239,12 @@ mod tests {
                 tag_name: String::new(),
                 self_closing: false,
                 val: 'i',
+            }),
+            Token::new(TokenOpt {
+                kind: TokenKind::EndTag,
+                tag_name: "body".to_string(),
+                self_closing: false,
+                val: '\0',
             }),
             Token::new(TokenOpt {
                 kind: TokenKind::EndTag,
