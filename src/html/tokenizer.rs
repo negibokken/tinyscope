@@ -95,7 +95,6 @@ impl Tokenizer {
                     go!(self, State::SelfClosingStartTagState);
                 }
                 '>' => {
-                    let tok = self.current_token.clone().unwrap();
                     self.emit_current_token();
                     go!(self, State::DataState);
                 }
