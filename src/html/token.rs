@@ -7,11 +7,11 @@ pub enum TokenKind {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Token {
-    kind: TokenKind,
-    self_closing: bool,
+    pub kind: TokenKind,
+    pub self_closing: bool,
 
-    tag_name: String,
-    val: char,
+    pub tag_name: String,
+    pub val: char,
 }
 
 pub struct TokenOpt {
