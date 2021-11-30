@@ -6,11 +6,24 @@ pub struct TreeBuilder {
     state: State,
     tokens: VecDeque<Token>,
 
-    document: Option<Node>,
+    document: Node,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Node {}
+pub struct Node {
+    children: Vec<Node>,
+}
+
+impl Node {
+    pub fn new() -> Self {
+        Node {
+            children: Vec::new(),
+        }
+    }
+    pub fn apend_child(&mut self, child: Node) {
+        self.children.push(child);
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum State {
@@ -32,7 +45,7 @@ impl TreeBuilder {
             state: State::Initial,
             tokens: tokens.clone(),
 
-            document: None,
+            document: Node { children: vec![] },
         }
     }
 
@@ -59,7 +72,8 @@ impl TreeBuilder {
             State::BeforeHtml => match take_next_token(&mut self.tokens) {
                 Some(tok) => match tok.kind {
                     TokenKind::StartTag if tok.tag_name == "html" => {
-                        self.document = Some(Node {});
+                        let child = Node::new();
+                        self.document.apend_child(child);
                     }
                     _ => {
                         self.state = State::BeforeHtml;
@@ -82,6 +96,7 @@ mod test {
     fn initial_state_is_initial() {
         let tree_builder = TreeBuilder::new(&mut VecDeque::new());
         assert_eq!(tree_builder.state, State::Initial);
+        assert_eq!(tree_builder.document, Node { children: vec![] });
     }
 
     #[test]
@@ -96,6 +111,11 @@ mod test {
         let mut tree_builder = TreeBuilder::new(&mut vd);
         while tree_builder.consume() {}
         assert_eq!(tree_builder.state, State::BeforeHtml);
-        assert_eq!(tree_builder.document, Some(Node {}));
+        assert_eq!(
+            tree_builder.document,
+            Node {
+                children: vec![Node { children: vec![] }]
+            }
+        );
     }
 }
